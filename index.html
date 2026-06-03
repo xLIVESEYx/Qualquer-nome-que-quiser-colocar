@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de CEP</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/235/235861.png">
+    <link rel="stylesheet" href="Cep/style.css">
+    <script src="Cep/script.js" defer></script>
+</head>
+<body>
+    <div id="container">
+        <h1>Consulta de Endereço por CEP</h1>
+        <p>Digite o CEP para obter o endereço correspondente.</p>
+        <form id="formEndereco">
+            <label for="cep">Digite o CEP:</label>
+            <input
+                type="text"
+                id="cep"
+                maxlength="9"
+                placeholder="00000-000"
+                required
+            >
+            <input
+                type="text"
+                id="rua"
+                placeholder="Rua"
+                readonly
+            >
+            <input
+                type="text"
+                id="bairro"
+                placeholder="Bairro"
+                readonly
+            >
+            <input
+                type="text"
+                id="cidade"
+                placeholder="Cidade"
+                readonly
+            >
+            <p id="Feedback"></p>
+            <!-- mapa -->
+            <iframe
+                id="mapaCidade"
+                width="800"
+                height="600">
+            </iframe>
+        </form>
+        <P>CEPs:    Minas Novas/MG 39650-000 ===
+                    Turmalina/MG 39660-000 ===
+                    Capelinha/MG possui códigos postais específicos por logradouro, variando na faixa de 39680-001 a 39684-999.
+        </P>
+    </div>
+</body>
+</html>
