@@ -1,56 +1,201 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de CEP</title>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/235/235861.png">
-    <link rel="stylesheet" href="Cep/style.css">
-    <script src="Cep/script.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConsultaCEP - Busca de Endereço</title>
+  <meta name="description" content="Consulte endereços brasileiros pelo CEP. Rápido, gratuito e com histórico.">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/235/235861.png">
+  <link rel="stylesheet" href="Cep/style.css">
 </head>
 <body>
-    <div id="container">
-        <h1>Consulta de Endereço por CEP</h1>
-        <p>Digite o CEP para obter o endereço correspondente.</p>
-        <form id="formEndereco">
-            <label for="cep">Digite o CEP:</label>
+
+  <!-- Animated Background Particles -->
+  <div class="particles" aria-hidden="true">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div id="container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-icon" aria-label="Logo">📍</div>
+        <div class="header-title">
+          <h1>ConsultaCEP</h1>
+          <p>Busca de endereço por CEP</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">☀️</button>
+      </div>
+    </header>
+
+    <!-- Main Search Card -->
+    <main class="main-card">
+      <h2 class="card-title">🔍 Consultar Endereço</h2>
+      <p class="card-subtitle">Digite um CEP brasileiro e obtenha o endereço completo instantaneamente.</p>
+
+      <div class="search-section">
+        <div class="input-group">
+          <div class="input-wrapper">
+            <span class="input-icon">📮</span>
             <input
-                type="text"
-                id="cep"
-                maxlength="9"
-                placeholder="00000-000"
-                required
+              type="text"
+              id="cep"
+              maxlength="9"
+              placeholder="Ex: 01310-100"
+              autocomplete="postal-code"
+              aria-label="Digite o CEP"
             >
-            <input
-                type="text"
-                id="rua"
-                placeholder="Rua"
-                readonly
-            >
-            <input
-                type="text"
-                id="bairro"
-                placeholder="Bairro"
-                readonly
-            >
-            <input
-                type="text"
-                id="cidade"
-                placeholder="Cidade"
-                readonly
-            >
-            <p id="Feedback"></p>
-            <!-- mapa -->
-            <iframe
-                id="mapaCidade"
-                width="800"
-                height="600">
-            </iframe>
-        </form>
-        <P>CEPs:    Minas Novas/MG 39650-000 ===
-                    Turmalina/MG 39660-000 ===
-                    Capelinha/MG possui códigos postais específicos por logradouro, variando na faixa de 39680-001 a 39684-999.
-        </P>
-    </div>
+          </div>
+          <button class="btn btn-primary" id="searchBtn">🔍 Consultar</button>
+        </div>
+
+        <div class="loading-spinner" id="loading">
+          <div class="spinner"></div>
+          <span>Consultando CEP...</span>
+        </div>
+
+        <div class="address-grid">
+          <div class="field-group full-width">
+            <label for="rua">Logradouro</label>
+            <input type="text" id="rua" placeholder="Rua, Avenida..." readonly>
+          </div>
+          <div class="field-group">
+            <label for="bairro">Bairro</label>
+            <input type="text" id="bairro" placeholder="Bairro" readonly>
+          </div>
+          <div class="field-group">
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" placeholder="Cidade" readonly>
+          </div>
+          <div class="field-group">
+            <label for="estado">Estado</label>
+            <input type="text" id="estado" placeholder="UF" readonly>
+          </div>
+          <div class="field-group">
+            <label for="ibge">Código IBGE</label>
+            <input type="text" id="ibge" placeholder="IBGE" readonly>
+          </div>
+          <div class="field-group">
+            <label for="ddd">DDD</label>
+            <input type="text" id="ddd" placeholder="DDD" readonly>
+          </div>
+        </div>
+
+        <div id="Feedback"></div>
+
+        <!-- Address Result Card -->
+        <div class="address-result" id="addressResult">
+          <div class="address-result-header">
+            <h3>📋 Endereço Completo</h3>
+            <span class="cep-badge" id="resultCep">00000-000</span>
+          </div>
+          <div class="address-lines">
+            <div class="address-line">
+              <span class="label">RUA</span>
+              <span class="value" id="resultLogradouro">—</span>
+            </div>
+            <div class="address-line">
+              <span class="label">BAIRRO</span>
+              <span class="value" id="resultBairro">—</span>
+            </div>
+            <div class="address-line">
+              <span class="label">CIDADE</span>
+              <span class="value" id="resultCidade">—</span>
+            </div>
+            <div class="address-line">
+              <span class="label">ESTADO</span>
+              <span class="value" id="resultEstado">—</span>
+            </div>
+            <div class="address-line">
+              <span class="label">IBGE</span>
+              <span class="value" id="resultIbge">—</span>
+            </div>
+            <div class="address-line">
+              <span class="label">DDD</span>
+              <span class="value" id="resultDdd">—</span>
+            </div>
+          </div>
+
+          <div class="actions-bar">
+            <button class="btn btn-success" onclick="saveAddress()" title="Salvar endereço">⭐ Salvar</button>
+            <button class="btn" onclick="copyAddress()" title="Copiar endereço">📋 Copiar</button>
+            <button class="btn" onclick="openInMaps()" title="Abrir no mapa">🗺️ Ver no Mapa</button>
+            <button class="btn" onclick="exportAddress('json')" title="Exportar como JSON">📄 JSON</button>
+            <button class="btn" onclick="exportAddress('csv')" title="Exportar como CSV">📊 CSV</button>
+            <button class="btn" onclick="exportAddress('txt')" title="Exportar como TXT">📝 TXT</button>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <iframe
+          id="mapaCidade"
+          width="100%"
+          height="400"
+          style="display:none; margin-top:16px; border-radius:12px; border:none;"
+          title="Mapa do endereço"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </main>
+
+    <!-- History / Saved Section -->
+    <section class="section-card">
+      <div class="tabs" role="tablist">
+        <button class="tab active" id="tabHistory" role="tab">📜 Histórico</button>
+        <button class="tab" id="tabSaved" role="tab">⭐ Salvos</button>
+      </div>
+
+      <!-- History -->
+      <div id="historySection">
+        <div class="section-header">
+          <h2>📜 Últimas Consultas <span id="historyCount">0</span></h2>
+          <button class="btn btn-danger" onclick="clearHistory()">🗑️ Limpar</button>
+        </div>
+        <div class="items-container" id="historyContainer">
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <p>Nenhuma consulta ainda.<br>Busque um CEP para começar!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved -->
+      <div id="savedSection" style="display:none;">
+        <div class="section-header">
+          <h2>⭐ Endereços Salvos <span id="savedCount">0</span></h2>
+        </div>
+        <div class="items-container" id="savedContainer">
+          <div class="empty-state">
+            <div class="empty-icon">⭐</div>
+            <p>Nenhum endereço salvo.<br>Salve endereços para acessá-los rapidamente!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Dados fornecidos por <a href="https://viacep.com.br" target="_blank" rel="noopener">ViaCEP</a> &amp; <a href="https://openstreetmap.org" target="_blank" rel="noopener">OpenStreetMap</a></p>
+      <p style="margin-top:4px;">💡 Dica: Pressione <kbd>Ctrl+K</kbd> para focar no campo de CEP</p>
+    </footer>
+
+  </div>
+
+  <script src="Cep/script.js" defer></script>
 </body>
 </html>
