@@ -1,0 +1,12 @@
+{
+  "name": "consulta-cep",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Consulta de Endereço por CEP - Brazilian ZIP code lookup tool",
+  "scripts": {
+    "install": "echo 'No dependencies to install - static HTML project'",
+    "dev": "npx serve . -l 3000",
+    "build": "echo 'No build step needed - static HTML project'",
+    "start": "npx serve . -l 3000"
+  }
+}
