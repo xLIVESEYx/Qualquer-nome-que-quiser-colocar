@@ -127,7 +127,7 @@ async function searchCep() {
     showFeedback("Endereço encontrado com sucesso! ✅", "success");
 
     // --- OpenStreetMap ---
-    updateMap(data.localidade, data.logradouro, data.uf);
+    updateMap(data.localidade, data.logradouro, data.uf, data.bairro);
 
     // --- Add to history ---
     addToHistory(data);
@@ -143,25 +143,47 @@ async function searchCep() {
 }
 
 // --- Map ---
-async function updateMap(cidade, logradouro, uf) {
+async function geocodeAddress(query) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&countrycodes=br`;
+  const response = await fetch(url, {
+    headers: { "Accept-Language": "pt-BR,pt;q=0.9" }
+  });
+  return response.json();
+}
+
+async function updateMap(cidade, logradouro, uf, bairro) {
   try {
-    const query = `${logradouro ? logradouro + ", " : ""}${cidade}, ${uf}, Brazil`;
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
-    );
-    const data = await response.json();
+    let data = [];
+
+    // Try full address first (street + neighborhood + city + state)
+    if (logradouro && bairro) {
+      data = await geocodeAddress(`${logradouro}, ${bairro}, ${cidade}, ${uf}`);
+    }
+
+    // Try street + city
+    if (data.length === 0 && logradouro) {
+      data = await geocodeAddress(`${logradouro}, ${cidade}, ${uf}`);
+    }
+
+    // Fallback: search by city only
+    if (data.length === 0) {
+      data = await geocodeAddress(`${cidade}, ${uf}`);
+    }
 
     if (data.length > 0) {
       const lat = parseFloat(data[0].lat);
       const lon = parseFloat(data[0].lon);
-      const zoom = logradouro ? 0.01 : 0.05;
+      const zoom = logradouro ? 0.02 : 0.08;
       mapaCidade.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - zoom}%2C${lat - zoom}%2C${lon + zoom}%2C${lat + zoom}&layer=mapnik&marker=${lat}%2C${lon}`;
       mapaCidade.style.display = "block";
     } else {
       mapaCidade.style.display = "none";
+      showFeedback("Mapa não disponível para este endereço.", "error");
     }
-  } catch {
+  } catch (error) {
+    console.error("Map error:", error);
     mapaCidade.style.display = "none";
+    showFeedback("Não foi possível carregar o mapa.", "error");
   }
 }
 
@@ -240,7 +262,13 @@ function exportAddress(format) {
 // --- Open in Maps ---
 function openInMaps() {
   if (!currentAddress) return;
-  const query = `${currentAddress.logradouro || ""}, ${currentAddress.localidade}, ${currentAddress.uf}, Brazil`;
+  const parts = [
+    currentAddress.logradouro,
+    currentAddress.bairro,
+    `${currentAddress.localidade} - ${currentAddress.uf}`,
+    "Brazil"
+  ].filter(Boolean);
+  const query = parts.join(", ");
   window.open(`https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`, "_blank");
 }
 
